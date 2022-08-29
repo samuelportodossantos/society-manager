@@ -3,7 +3,7 @@
         <label v-show="!hidelabel" for="input">{{label}}</label>
         <div class="content" :style="hidelabel ? {'margin-top': '30px'} : {}">
             <div id="input" class="icon" v-if="icon !== undefined" :style="{'background-image': `url('${this.image}')`}"></div>
-            <input v-if="type!=='button'" :type="type">
+            <input v-if="type!=='button'" v-model="componentValue" :type="type">
             <input v-else :type="type" :value="label" :style="iconStyle">
         </div>
     </div>
@@ -26,6 +26,20 @@ export default {
         hidelabel: {
             type: Boolean,
             default: false
+        },
+        fieldname: {
+            type: String,
+            required: true
+        }
+    },
+    data(){
+        return {
+            componentValue: ''
+        }
+    },
+    watch: {
+        componentValue() {
+            this.$emit('receive', {value: this.componentValue, fieldname: this.fieldname})
         }
     },
     computed: {

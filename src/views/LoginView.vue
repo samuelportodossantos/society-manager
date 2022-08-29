@@ -9,13 +9,30 @@
           <img src="@/assets/images/logo.svg" alt="" />
           <span class="version-label">v1.0</span>
         </div>
+        <LoadingComponent :visible="loading"></LoadingComponent>
         <div class="form-content">
           <form>
-            <FieldComponent label="Username" icon="user"></FieldComponent>
-            <FieldComponent type="password" label="Password" icon="password"></FieldComponent>
-            <FieldComponent type="button" label="Login" :hidelabel="true"></FieldComponent>
+            <FieldComponent
+              @receive="setValue"
+              fieldname="username"
+              label="Username"
+              icon="user"
+            ></FieldComponent>
+            <FieldComponent
+              @receive="setValue"
+              type="password"
+              fieldname="password"
+              label="Password"
+              icon="password"
+            ></FieldComponent>
+            <FieldComponent
+              type="button"
+              @click.prevent="doAuth"
+              fieldname=""
+              label="Login"
+              :hidelabel="true"
+            ></FieldComponent>
           </form>
-
           <a href="#">I can't login</a>
         </div>
       </div>
@@ -24,10 +41,41 @@
 </template>
 <script>
 import FieldComponent from "@/components/FieldComponent.vue";
+import Request from "@/common/Request";
+import LoadingComponent from "@/components/LoadingComponent.vue";
+import router from "@/router";
+
 export default {
   name: "LoginView",
   components: {
     FieldComponent,
+    LoadingComponent
+},
+  data() {
+    return {
+      form: {},
+      loading: false
+    };
+  },
+  methods: {
+    setValue(event) {      
+      this.form[event.fieldname] = event.value;
+    },
+    async doAuth() {
+      this.loading = true
+      const response = await Request.post(
+        "http://localhost:8080/auth/login",
+        this.form
+      );
+      this.loading = false
+
+      if (response.status === 'success') {
+        localStorage.setItem('token', response.data.token)
+        router.push('dashboard')
+      } else {
+        alert(response.message)
+      }
+    },
   },
 };
 </script>
@@ -79,7 +127,7 @@ h1 {
   width: 300px;
   height: 360px;
   background-color: #f0f0f0;
-  border-bottom: 25px solid #d9d9d9;
+  position: relative;
 }
 
 .form-header {
@@ -97,6 +145,8 @@ h1 {
   right: 20px;
   bottom: 7px;
 }
+
+
 
 @media (min-width: 1470px) {
   .window {
